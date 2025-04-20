@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding: 30px;
+      background-color: #e0f7ff;
+    }
+
+    .card-form {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .peserta-card {
+      border: 1px solid #cceeff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #f0fbff;
+    }
+
+    .delete-btn {
+      margin-top: 10px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .btn-tambah {
+      background-color: #3399ff;
+      color: white;
+    }
+
+    .btn-tambah:hover {
+      background-color: #007acc;
+    }
+
+    .btn-primary {
+      background-color: #007acc;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #005f99;
+    }
+
+    .title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    /* Styling for the popup */
+    .popup-notification {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    width: 90%;
+    background-color: #fff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    display: none;
+    animation: slideDown 0.4s ease forwards;
+  }
+
+  @keyframes slideDown {
+    0% {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+
+  .popup-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .popup-body {
+    padding: 15px;
+  }
+
+  .popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .popup-close:hover {
+    color: #ffcccc;
+  }
+
+    .popup-header {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .popup-body {
+      padding: 20px;
+    }
+
+    .popup-close {
+      background-color: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .popup-close:hover {
+      color: #ff4d4d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card-form">
+      <div class="title-bar">
+        <h2 class="mb-0">Form Pendaftaran Kontingen</h2>
+        <button type="button" class="btn btn-tambah" onclick="tambahPeserta()">+ Tambah Peserta</button>
+      </div>
+
+      <form id="mainForm">
+        <div class="mb-3">
+          <label class="form-label">Nama Kontingen</label>
+          <input type="text" class="form-control" id="kontingen" required>
+        </div>
+
+        <div id="pesertaContainer"></div>
+
+        <div class="text-muted mb-3">Maksimal 20 peserta</div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary" id="submitBtn">Kirim</button>
+          <div id="statusMsg" style="margin-top:10px; font-weight:bold;"></div>
+          <div id="progressContainer" style="width:100%; background:#e0e0e0; border-radius:10px; height:20px; margin-top:15px; display:none;">
+            <div id="progressBar" style="height:100%; width:0%; background:#007bff; border-radius:10px; transition:width 0.3s ease;"></div>
+          </div>
+          <div id="progressText" class="text-center mt-2 fw-bold"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Popup Notification -->
+    <div id="popupNotification" class="popup-notification">
+      <div class="popup-header">
+        <span>Proses Pengiriman</span>
+        <button class="popup-close" onclick="closePopup()">×</button>
+      </div>
+      <div class="popup-body" id="popupMessage">
+        <!-- Dynamic message will go here -->
+      </div>
+    </div>
+
+    <!-- Perkenalan UKM -->
+    <div class="text-center mt-4">
+      <div style="background-color:#f0fbff; border-radius:12px; padding:20px; margin-top:20px;">
+        <h4><strong>🌟 Tentang UKM PS-UH (Pencak Silat Universitas Hasanuddin)</strong></h4>
+          ➤ Tempat kamu melatih <strong>diri, jiwa, dan budaya</strong>.<br>
+          ➤ Terbuka untuk <strong>UMUM!</strong><br>
+          ➤ Belajar silat, <strong>bangun rasa persaudaraan</strong>!
+        </p>
+        <p><strong>📍 Join us, and be part of something powerful.</strong></p>
+      </div>
+
+      <div class="ratio ratio-16x9">
+        <iframe 
+          src="https://www.youtube.com/embed/Pdmym_YcB18?si=PPv_TqFLdMCYST9z" 
+          title="🎥 Tonton Video Perkenalan UKM Pencak Silat Unhas (PS-UH) - Yuk, Temukan Semangat Baru!" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let jumlahPeserta = 0;
+
+    function tambahPeserta() {
+      if (jumlahPeserta >= 20) return alert("Maksimal 20 peserta");
+
+      const container = document.getElementById("pesertaContainer");
+      const div = document.createElement("div");
+      div.className = "peserta-card";
+      div.innerHTML = ` 
+        <h5>Peserta ${jumlahPeserta + 1}</h5>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nama Peserta</label>
+            <input type="text" name="nama" class="form-control" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Usia</label>
+            <select name="usia" class="form-select" required>
+              <option value="">-- Pilih --</option>
+              <option>Pra Usia Dini</option>
+              <option>Usia Dini 1</option>
+              <option>Usia Dini 2</option>
+              <option>Pra Remaja</option>
+              <option>Remaja</option>
+              <option>Dewasa</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Jenis Kelamin</label>
+            <select name="jk" class="form-select" required>
+              <option value="">-- Pilih --</option>
+              <option>Laki-laki</option>
+              <option>Perempuan</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Kategori Lomba</label>
+            <select name="kategori" class="form-select" onchange="handleKategoriChange(this)" required>
+              <option value="">-- Pilih --</option>
+              <option value="Seni">Seni</option>
+              <option value="Fighter">Fighter</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Subkategori</label>
+            <select name="subKategori" class="form-select" required></select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Kelengkapan Berkas (PDF : KK & Akte Kelahiran)</label>
+            <input type="file" name="berkas" class="form-control" accept="application/pdf" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Pas Foto (JPG/PNG)</label>
+            <input type="file" name="pasfoto" class="form-control" accept="image/jpeg, image/png" required>
+          </div>
+        </div>
+        <button type="button" class="delete-btn" onclick="hapusPeserta(this)">Hapus Peserta</button>
+      `;
+      container.appendChild(div);
+      jumlahPeserta++;
+      updateNomorPeserta();
+      updateTombolHapus();
+    }
+
+    function hapusPeserta(button) {
+      button.parentElement.remove();
+      jumlahPeserta--;
+      updateNomorPeserta();
+      updateTombolHapus();
+    }
+
+    function updateTombolHapus() {
+      const cards = document.querySelectorAll(".peserta-card");
+      cards.forEach(card => {
+        const btn = card.querySelector(".delete-btn");
+        btn.style.display = (cards.length === 1) ? "none" : "inline-block";
+      });
+    }
+
+    function updateNomorPeserta() {
+      const cards = document.querySelectorAll(".peserta-card");
+      cards.forEach((card, index) => {
+        const h5 = card.querySelector("h5");
+        h5.textContent = `Peserta ${index + 1}`;
+      });
+    }
+
+    function handleKategoriChange(select) {
+      const subKategori = select.parentElement.parentElement.querySelector('select[name="subKategori"]');
+      const value = select.value;
+      let options = '';
+      if (value === "Seni") {
+        options = `<option>Tunggal Tangan Kosong</option><option>Tunggal Bersenjata</option><option>Tunggal Full</option><option>Solo Kreatif Tangan Kosong</option><option>Solo Kreatif Bersenjata</option><option>Solo Kreatif Tangan Kosong & Bersenjata</option>`; 
+      } else if (value === "Fighter") {
+        options = `<option>Kelas A</option><option>Kelas B</option><option>Kelas C</option><option>Kelas D</option><option>Kelas E</option><option>Kelas F</option><option>Kelas G</option><option>Kelas H</option>`;
+      }
+      subKategori.innerHTML = options;
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("mainForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+
+      const kontingen = document.getElementById("kontingen").value;
+      const pesertaCards = document.querySelectorAll(".peserta-card");
+
+      const pesertaList = [];
+      let uploadedCount = 0;
+
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      progressContainer.style.display = "block";
+
+      for (const card of pesertaCards) {
+        const nama = card.querySelector('input[name="nama"]').value;
+        const usia = card.querySelector('select[name="usia"]').value;
+        const jk = card.querySelector('select[name="jk"]').value;
+        const kategori = card.querySelector('select[name="kategori"]').value;
+        const subKategori = card.querySelector('select[name="subKategori"]').value;
+        const berkasFile = card.querySelector('input[name="berkas"]').files[0];
+        const pasFotoFile = card.querySelector('input[name="pasfoto"]').files[0];
+
+        const berkasBase64 = await fileToBase64(berkasFile);
+        const pasFotoBase64 = await fileToBase64(pasFotoFile);
+
+        pesertaList.push({
+          nama, usia, jenisKelamin: jk,
+          kategori, subKategori,
+          kelengkapanBerkas: berkasBase64.split(",")[1],
+          kelengkapanBerkasName: berkasFile.name,
+          kelengkapanBerkasType: berkasFile.type,
+          pasFoto: pasFotoBase64.split(",")[1],
+          pasFotoName: pasFotoFile.name,
+          pasFotoType: pasFotoFile.type
+        });
+
+        uploadedCount++;
+        const progress = Math.floor((uploadedCount / pesertaCards.length) * 100);
+        progressBar.style.width = `${progress}%`;
+        progressText.innerText = `${progress}% proses pengiriman`;
+      }
+
+      google.script.run.withSuccessHandler(function(response) {
+        showPopup("Data berhasil dikirim!");
+        document.getElementById("mainForm").reset();
+        document.getElementById("pesertaContainer").innerHTML = "";
+        jumlahPeserta = 0;
+        progressContainer.style.display = "none";
+        progressBar.style.width = "0%";
+        progressText.innerText = "";
+        submitBtn.disabled = false;
+      }).uploadForm({ kontingen, pesertaList });
+    });
+
+  function showPopup(message) {
+  const popup = document.getElementById("popupNotification");
+  const popupMessage = document.getElementById("popupMessage");
+  popupMessage.innerHTML = message;
+  popup.style.display = "block";
+
+  // Reset animation
+  popup.style.animation = "none";
+  popup.offsetHeight; // Trigger reflow
+  popup.style.animation = "slideDown 0.4s ease forwards";
+}
+
+
+    function closePopup() {
+      document.getElementById("popupNotification").style.display = "none";
+    }
+  </script>
+</body>
+</html>
